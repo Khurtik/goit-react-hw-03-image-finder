@@ -1,50 +1,31 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './Searchbar.module.css';
 
-class SearchBar extends Component {
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired,
-  };
+const SearchBar = ({ handleChange, handleSubmit, searchQuery }) => (
+  <header className={styles.Searchbar}>
+    <form className={styles.SearchForm} onSubmit={handleSubmit}>
+      <button type="submit" className={styles.SearchFormButton}>
+        <span className={styles.SearchFormButtonLabel}>Search</span>
+      </button>
 
-  state = {
-    value: '',
-  };
-
-  handleChange = e => {
-    this.setState({ value: e.target.value });
-  };
-
-  handleSubmit = e => {
-    e.preventDefault();
-    const { onSubmit } = this.props;
-    const { value } = this.state;
-    onSubmit(value);
-    this.setState({ value: '' });
-  };
-
-  render() {
-    const { value } = this.state;
-    return (
-      <header className={styles.Searchbar}>
-        <form className={styles.SearchForm} onSubmit={this.handleSubmit}>
-          <button type="submit" className={styles.SearchFormButton}>
-            <span className={styles.SearchFormButtonLabel}>Search</span>
-          </button>
-
-          <input
-            className={styles.SearchFormInput}
-            type="text"
-            autoComplete="off"
-            // autoFocus
-            placeholder="Search images and photos"
-            onChange={this.handleChange}
-            value={value}
-          />
-        </form>
-      </header>
-    );
-  }
-}
+      <input
+        className={styles.SearchFormInput}
+        type="text"
+        autoComplete="off"
+        // eslint-disable-next-line jsx-a11y/no-autofocus
+        autoFocus
+        placeholder="Search images and photos"
+        onChange={handleChange}
+        value={searchQuery}
+      />
+    </form>
+  </header>
+);
+SearchBar.propTypes = {
+  handleSubmit: PropTypes.func.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  searchQuery: PropTypes.string.isRequired,
+};
 
 export default SearchBar;

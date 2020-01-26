@@ -7,18 +7,23 @@ const ImageGallery = ({ items }) => {
   return (
     <ul className={styles.ImageGallery}>
       {items.map(item => (
-        <ImageGalleryItem webImgURL={item.webformatURL} key={item.id} />
+        <ImageGalleryItem
+          key={item.id}
+          webImgURL={item.webformatURL}
+          largeImgURL={item.largeImageURL}
+        />
       ))}
     </ul>
   );
 };
 
-ImageGallery.defaultProps = {
-  items: [],
-};
-
 ImageGallery.propTypes = {
-  items: PropTypes.arrayOf(PropTypes.shape({})),
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
 };
 
 export default ImageGallery;

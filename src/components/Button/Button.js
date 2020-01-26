@@ -7,10 +7,6 @@ const Button = ({ onClick }) => {
     <button className={styles.Button} type="button" onClick={onClick}>
       Load more
     </button>
-    // window.scrollTo({
-    //     top: document.documentElement.scrollHeight,
-    //     behavior: 'smooth',
-    //   });
   );
 };
 

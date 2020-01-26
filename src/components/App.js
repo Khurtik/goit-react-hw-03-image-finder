@@ -3,9 +3,8 @@ import * as API from '../services/api';
 import SearchBar from './SearchBar/SearchBar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
-import Modal from './Modal/Modal';
 import Loader from './Loader/Loader';
-import './App.css';
+import styles from './App.module.css';
 
 class App extends Component {
   state = {
@@ -13,30 +12,30 @@ class App extends Component {
     isLoading: false,
     searchQuery: '',
     pageNumber: 1,
-    isModalOpen: false,
   };
 
-  componentDidMount() {
-    const { searchQuery, pageNumber } = this.state;
-    this.onSearch(searchQuery, pageNumber);
-  }
+  // componentDidMount() {
+  //   const { searchQuery, pageNumber } = this.state;
+  //   this.onSearch(searchQuery, pageNumber);
+  // }
 
   componentDidUpdate(prevProps, prevState) {
-    const { searchQuery, pageNumber } = this.state;
-    if (
-      prevState.searchQuery !== searchQuery ||
-      prevState.pageNumber !== pageNumber
-    ) {
-      this.onSearch(searchQuery, pageNumber);
+    const { pageNumber } = this.state;
+    if (prevState.pageNumber !== pageNumber) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
     }
   }
 
-  onSearch = (query, pageNumber) => {
+  onSearch = (searchQuery, pageNumber) => {
     this.setState({ isLoading: true });
-    API.getItems(query, pageNumber)
-      .then(res =>
+    API.getItems(searchQuery, pageNumber)
+      .then(({ data }) =>
         this.setState(prevState => ({
-          items: [...prevState.items, ...res.data.hits],
+          pageNumber: prevState.pageNumber + 1,
+          items: [...prevState.items, ...data.hits],
         })),
       )
       .catch(err => {
@@ -45,41 +44,38 @@ class App extends Component {
       .finally(() => this.setState({ isLoading: false }));
   };
 
-  onSubmitSearchBar = text => {
-    this.setState({ searchQuery: text, items: [], pageNumber: 1 });
+  handleChange = e => {
+    this.setState({ searchQuery: e.target.value });
+  };
+
+  onSubmitSearchBar = e => {
+    e.preventDefault();
+    this.onSearch(this.state.searchQuery);
+
+    this.setState({ pageNumber: 1, items: [] });
   };
 
   onClickMore = () => {
-    this.setState(prevState => ({
-      pageNumber: prevState.pageNumber + 1,
-    }));
+    const { searchQuery, pageNumber } = this.state;
+    this.onSearch(searchQuery, pageNumber);
   };
 
-  // handleOpenModal = e => {
-  //   e.preventDefault();
-  //   if (e.target !== e.target.current) {
-  //     console.log(
-  //       (('e.target': e.target), ('e.current.target': e.current.target)),
-  //     );
-  //   }
-  // };
-
-  openModal = () => this.setState({ isModalOpen: true });
-
-  closeModal = () => this.setState({ isModalOpen: false });
-
   render() {
-    const { items, isLoading, isModalOpen } = this.state;
+    const { items, isLoading, searchQuery } = this.state;
     return (
-      <>
-        {isLoading && <Loader />}
-        <SearchBar onSubmit={this.onSubmitSearchBar} />
+      <div className={styles.App}>
+        <SearchBar
+          handleSubmit={this.onSubmitSearchBar}
+          handleChange={this.handleChange}
+          searchQuery={searchQuery}
+        />
         <ImageGallery items={items} />
-        {isModalOpen && (
-          <Modal onClose={this.closeModal} onOpen={this.openModal} />
+        {isLoading ? (
+          <Loader />
+        ) : (
+          items.length > 0 && <Button onClick={this.onClickMore} />
         )}
-        <Button onClick={this.onClickMore} />
-      </>
+      </div>
     );
   }
 }

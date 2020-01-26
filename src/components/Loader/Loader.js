@@ -5,7 +5,7 @@ import styles from './Loader.module.css';
 const Loader = () => {
   return (
     <div className={styles.loader}>
-      <LoaderComponent type="Puff" color="grey" height={100} width={100} />
+      <LoaderComponent type="Puff" color="blue" height={100} width={100} />
     </div>
   );
 };
