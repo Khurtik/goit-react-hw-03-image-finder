@@ -3,6 +3,7 @@ import * as API from '../services/api';
 import SearchBar from './SearchBar/SearchBar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
+import ErrorNotification from './ErrorNotification/ErrorNotification';
 import Loader from './Loader/Loader';
 import styles from './App.module.css';
 
@@ -12,12 +13,8 @@ class App extends Component {
     isLoading: false,
     searchQuery: '',
     pageNumber: 1,
+    error: null,
   };
-
-  // componentDidMount() {
-  //   const { searchQuery, pageNumber } = this.state;
-  //   this.onSearch(searchQuery, pageNumber);
-  // }
 
   componentDidUpdate(prevProps, prevState) {
     const { pageNumber } = this.state;
@@ -38,9 +35,7 @@ class App extends Component {
           items: [...prevState.items, ...data.hits],
         })),
       )
-      .catch(err => {
-        throw new Error(err);
-      })
+      .catch(error => this.setState({ error }))
       .finally(() => this.setState({ isLoading: false }));
   };
 
@@ -53,6 +48,7 @@ class App extends Component {
     this.onSearch(this.state.searchQuery);
 
     this.setState({ pageNumber: 1, items: [] });
+    this.setState({ searchQuery: '' });
   };
 
   onClickMore = () => {
@@ -61,7 +57,7 @@ class App extends Component {
   };
 
   render() {
-    const { items, isLoading, searchQuery } = this.state;
+    const { items, isLoading, searchQuery, error } = this.state;
     return (
       <div className={styles.App}>
         <SearchBar
@@ -70,6 +66,7 @@ class App extends Component {
           searchQuery={searchQuery}
         />
         <ImageGallery items={items} />
+        {error && <ErrorNotification text={error.message} />}
         {isLoading ? (
           <Loader />
         ) : (
