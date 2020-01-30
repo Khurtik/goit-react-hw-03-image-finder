@@ -12,17 +12,18 @@ class App extends Component {
     items: [],
     isLoading: false,
     searchQuery: '',
-    pageNumber: 1,
+    text: '',
+    pageNumber: 0,
     error: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { pageNumber } = this.state;
-    if (prevState.pageNumber !== pageNumber) {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth',
-      });
+    const { searchQuery, pageNumber } = this.state;
+    if (
+      prevState.searchQuery !== searchQuery ||
+      prevState.pageNumber !== pageNumber
+    ) {
+      this.onSearch(searchQuery, pageNumber);
     }
   }
 
@@ -31,39 +32,44 @@ class App extends Component {
     API.getItems(searchQuery, pageNumber)
       .then(({ data }) =>
         this.setState(prevState => ({
-          pageNumber: prevState.pageNumber + 1,
           items: [...prevState.items, ...data.hits],
         })),
       )
       .catch(error => this.setState({ error }))
-      .finally(() => this.setState({ isLoading: false }));
+      .finally(
+        () =>
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          }),
+        this.setState({ isLoading: false }),
+      );
   };
 
   handleChange = e => {
-    this.setState({ searchQuery: e.target.value });
+    this.setState({ text: e.target.value });
   };
 
   onSubmitSearchBar = e => {
     e.preventDefault();
-    this.onSearch(this.state.searchQuery);
-
-    this.setState({ pageNumber: 1, items: [] });
-    this.setState({ searchQuery: '' });
+    const { text } = this.state;
+    this.setState({ pageNumber: 1, items: [], searchQuery: text });
+    this.setState({ text: '' });
   };
 
   onClickMore = () => {
-    const { searchQuery, pageNumber } = this.state;
-    this.onSearch(searchQuery, pageNumber);
+    const { pageNumber } = this.state;
+    this.setState({ pageNumber: pageNumber + 1 });
   };
 
   render() {
-    const { items, isLoading, searchQuery, error } = this.state;
+    const { items, isLoading, error, text } = this.state;
     return (
       <div className={styles.App}>
         <SearchBar
           handleSubmit={this.onSubmitSearchBar}
           handleChange={this.handleChange}
-          searchQuery={searchQuery}
+          searchQuery={text}
         />
         <ImageGallery items={items} />
         {error && <ErrorNotification text={error.message} />}
